@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Anand Verma - Interactive Portfolio</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      overflow-x: hidden;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+
+    /* Navigation */
+    nav {
+      position: fixed; top: 0; width: 100%;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      z-index: 1000; transition: all 0.3s ease;
+    }
+    nav.scrolled { background: rgba(255, 255, 255, 0.95); box-shadow: 0 2px 20px rgba(0,0,0,0.1); }
+    nav ul { list-style: none; display: flex; justify-content: center; padding: 15px 0; }
+    nav li { margin: 0 25px; }
+    nav a { text-decoration: none; color: white; font-weight: 500; transition: all 0.3s ease; position: relative; }
+    nav.scrolled a { color: #333; }
+    nav a:hover { transform: translateY(-2px); }
+    nav a::after {
+      content: ''; position: absolute; bottom: -5px; left: 0; width: 0; height: 2px;
+      background: #ff6b6b; transition: width 0.3s ease;
+    }
+    nav a:hover::after { width: 100%; }
+
+    /* Hero Section */
+    .hero {
+      height: 100vh; display: flex; align-items: center; justify-content: center;
+      text-align: center; position: relative;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      overflow: hidden; will-change: transform;
+    }
+    .hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="80" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="40" cy="70" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="90" cy="30" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="70" cy="10" r="1" fill="rgba(255,255,255,0.1)"/></svg>') repeat;
+      animation: float 20s infinite linear;
+    }
+    @keyframes float { 0% { transform: translate(0,0);} 100% { transform: translate(-100px,-100px);} }
+    .hero-content { z-index: 2; position: relative; }
+    .hero h1 {
+      font-size: 4rem; font-weight: 700; color: white; margin-bottom: 1rem;
+      opacity: 0; transform: translateY(50px); animation: fadeInUp 1s ease 0.5s forwards;
+    }
+    .hero .subtitle {
+      font-size: 1.5rem; color: rgba(255,255,255,0.9); margin-bottom: 2rem;
+      opacity: 0; transform: translateY(30px); animation: fadeInUp 1s ease 1s forwards;
+    }
+    .cta-button {
+      display: inline-block; padding: 15px 30px;
+      background: linear-gradient(45deg, #ff6b6b, #ffd93d); color: white; text-decoration: none;
+      border-radius: 50px; font-weight: 600; transform: translateY(20px); opacity: 0;
+      animation: fadeInUp 1s ease 1.5s forwards; transition: all 0.3s ease;
+    }
+    .cta-button:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+    @keyframes fadeInUp { to { opacity: 1; transform: translateY(0);} }
+
+    /* Scroll indicator */
+    .scroll-indicator {
+      position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+      color: white; animation: bounce 2s infinite;
+    }
+    @keyframes bounce {
+      0%,20%,50%,80%,100% { transform: translateX(-50%) translateY(0); }
+      40% { transform: translateX(-50%) translateY(-10px); }
+      60% { transform: translateX(-50%) translateY(-5px); }
+    }
+
+    /* Sections */
+    .section { padding: 100px 0; position: relative; background: white; }
+    .section:nth-child(even) { background: #f8f9fa; }
+    .section-title {
+      font-size: 3rem; text-align: center; margin-bottom: 3rem;
+      opacity: 0; transform: translateY(50px); transition: all 0.8s ease;
+    }
+    .section-title.animate { opacity: 1; transform: translateY(0); }
+
+    /* About Section */
+    .about-content { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+    .about-text {
+      font-size: 1.2rem; line-height: 1.8;
+      opacity: 0; transform: translateX(-50px); transition: all 0.8s ease 0.2s;
+    }
+    .about-text.animate { opacity: 1; transform: translateX(0); }
+    .about-image {
+      position: relative; opacity: 0; transform: translateX(50px); transition: all 0.8s ease 0.4s;
+    }
+    .about-image.animate { opacity: 1; transform: translateX(0); }
+    .profile-card {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      padding: 40px; border-radius: 20px; text-align: center; color: white; position: relative; overflow: hidden;
+    }
+    .profile-card::before {
+      content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+      transform: rotate(45deg); animation: shine 3s infinite;
+    }
+    @keyframes shine {
+      0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+      100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+    }
+    .avatar {
+      width: 120px; height: 120px; background: rgba(255,255,255,0.2);
+      border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;
+      font-size: 3rem; position: relative; z-index: 2;
+    }
+
+    /* Skills Section */
+    .skills-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+    .skill-card {
+      background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      transform: translateY(50px); opacity: 0; transition: all 0.6s ease; position: relative; overflow: hidden;
+    }
+    .skill-card.animate { transform: translateY(0); opacity: 1; }
+    .skill-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.15); }
+    .skill-icon {
+      width: 60px; height: 60px; background: linear-gradient(135deg, #ff6b6b, #ffd93d);
+      border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: white; margin-bottom: 20px;
+    }
+
+    /* Projects Section */
+    .projects-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 40px; }
+    .project-card {
+      background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+      transform: scale(0.9); opacity: 0; transition: all 0.6s ease;
+    }
+    .project-card.animate { transform: scale(1); opacity: 1; }
+    .project-card:hover { transform: translateY(-15px) scale(1.02); box-shadow: 0 25px 50px rgba(0,0,0,0.15); }
+    .project-image {
+      height: 200px; background: linear-gradient(135deg, #667eea, #764ba2);
+      display: flex; align-items: center; justify-content: center; color: white; font-size: 3rem; position: relative; overflow: hidden;
+    }
+    .project-content { padding: 30px; }
+    .project-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 15px; color: #333; }
+    .project-desc { color: #666; margin-bottom: 20px; line-height: 1.6; }
+    .project-tags { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+    .tag { background: #f0f0f0; padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; color: #666; }
+    .project-link { color: #667eea; text-decoration: none; font-weight: 600; transition: all 0.3s ease; }
+    .project-link:hover { color: #ff6b6b; }
+
+    /* Experience Timeline */
+    .experience-timeline { position: relative; padding-left: 30px; }
+    .experience-timeline::before {
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+      background: linear-gradient(180deg, #667eea, #764ba2); border-radius: 3px;
+    }
+    .timeline-item {
+      position: relative; margin-bottom: 40px; padding-left: 40px;
+      transform: translateX(-50px); opacity: 0; transition: all 0.8s ease;
+    }
+    .timeline-item.animate { transform: translateX(0); opacity: 1; }
+    .timeline-item::before {
+      content: ''; position: absolute; left: -46px; top: 10px; width: 16px; height: 16px;
+      background: #ff6b6b; border-radius: 50%; border: 3px solid white;
+      box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.3);
+    }
+    .timeline-date {
+      color: #667eea; font-weight: 600; font-size: 0.9rem; margin-bottom: 10px;
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .timeline-content h3 { color: #333; font-size: 1.3rem; margin-bottom: 5px; }
+    .timeline-content h4 { color: #666; font-size: 1.1rem; margin-bottom: 15px; font-weight: 500; }
+    .timeline-content p { color: #555; line-height: 1.6; margin-bottom: 15px; }
+    .experience-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+
+    /* Blog Section */
+    .blog-posts { display: grid; gap: 40px; }
+    .blog-post {
+      display: grid; grid-template-columns: 200px 1fr; gap: 30px;
+      padding: 30px; background: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      transform: translateX(-100px); opacity: 0; transition: all 0.8s ease;
+    }
+    .blog-post.animate { transform: translateX(0); opacity: 1; }
+    .blog-post:hover { transform: translateX(10px); box-shadow: 0 15px 40px rgba(0,0,0,0.15); }
+    .blog-date {
+      background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 20px; border-radius: 15px;
+      text-align: center; display: flex; flex-direction: column; justify-content: center;
+    }
+    .blog-content h3 { font-size: 1.5rem; margin-bottom: 15px; color: #333; }
+    .blog-excerpt { color: #666; line-height: 1.6; }
+
+    /* Contact Section */
+    .contact { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
+    .contact-content { text-align: center; max-width: 600px; margin: 0 auto; }
+    .contact-form { display: grid; gap: 20px; margin-top: 40px; }
+    .form-group { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .contact-form input, .contact-form textarea {
+      padding: 15px; border: none; border-radius: 10px; background: rgba(255,255,255,0.1); color: white;
+      backdrop-filter: blur(10px); transition: all 0.3s ease;
+    }
+    .contact-form input::placeholder, .contact-form textarea::placeholder { color: rgba(255,255,255,0.7); }
+    .contact-form input:focus, .contact-form textarea:focus {
+      outline: none; background: rgba(255,255,255,0.2); transform: scale(1.02);
+    }
+    .submit-btn {
+      background: linear-gradient(45deg, #ff6b6b, #ffd93d); color: white; border: none; padding: 15px 30px;
+      border-radius: 50px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;
+    }
+    .submit-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+
+    /* Footer */
+    footer { background: #222; color: white; text-align: center; padding: 40px 0; }
+    .social-links { margin-bottom: 20px; }
+    .social-links a { display: inline-block; margin: 0 15px; color: white; font-size: 1.5rem; transition: all 0.3s ease; }
+    .social-links a:hover { color: #ff6b6b; transform: translateY(-3px); }
+
+    /* Progress Bar */
+    .progress-bar {
+      position: fixed; top: 0; left: 0; height: 4px;
+      background: linear-gradient(90deg, #ff6b6b, #ffd93d);
+      z-index: 9999; transition: width 0.2s ease;
+      width: 0%;
+    }
+
+    /* Offset for fixed navbar when using scrollIntoView/hash links */
+    .hero, .section { scroll-margin-top: 80px; }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 2.5rem; }
+      .hero .subtitle { font-size: 1.2rem; }
+      .about-content, .form-group { grid-template-columns: 1fr; }
+      .blog-post { grid-template-columns: 1fr; }
+      nav ul { flex-direction: column; gap: 10px; }
+      .section-title { font-size: 2rem; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Progress Bar -->
+  <div class="progress-bar" id="progressBar"></div>
+
+  <!-- Navigation -->
+  <nav id="navbar">
+    <ul>
+      <li><a href="#home">Home</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#skills">Skills</a></li>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#experience">Experience</a></li>
+      <li><a href="#blog">Blog</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero" id="home">
+    <div class="hero-content">
+      <h1>Anand Verma</h1>
+      <p class="subtitle">Multimedia Journalist & Digital Storyteller</p>
+      <a href="#about" class="cta-button">Discover My Story</a>
+    </div>
+    <div class="scroll-indicator">↓ Scroll to explore</div>
+  </section>
+
+  <!-- About Section -->
+  <section class="section" id="about">
+    <div class="container">
+      <h2 class="section-title">About Me</h2>
+      <div class="about-content">
+        <div class="about-text">
+          <p>I'm a passionate multimedia journalist pursuing my MA in Journalism and Mass Communication at SRM Institute of Science and Technology. With expertise in long-form writing, research, and AI evaluation, I believe in the power of storytelling across all mediums.</p>
+          <p>My journey spans from writing comprehensive academic papers for Routledge publications to creating the 'Journalism Unplugged' podcast. I've evaluated 180+ documentaries, trained AI chatbots, and authored compelling profiles that bridge traditional journalism with modern digital storytelling.</p>
+          <p>When I'm not researching or writing, you'll find me exploring the intersection of technology and media, crafting stories that matter, or diving deep into documentary filmmaking and multimedia production.</p>
+        </div>
+        <div class="about-image">
+          <div class="profile-card">
+            <div class="avatar">📰</div>
+            <h3>Anand Verma</h3>
+            <p>Multimedia Journalist</p>
+            <p>📍 Chennai, Tamil Nadu</p>
+            <p>✨ MA Journalism Student</p>
+            <p>🎓 CGPA: 8.22</p>
+          </div>
+        </div>
+        
+        <!-- ADD NEW PROJECTS HERE - Copy this template: -->
+        <!-- 
+        <div class="project-card">
+          <div class="project-image">🎯</div>
+          <div class="project-content">
+            <h3 class="project-title">New Project Title</h3>
+            <p class="project-desc">Description of your new project goes here...</p>
+            <div class="project-tags">
+              <span class="tag">Tag1</span>
+              <span class="tag">Tag2</span>
+              <span class="tag">Tag3</span>
+            </div>
+            <a href="#" class="project-link">View Project →</a>
+          </div>
+        </div>
+        -->
+        
+      </div>
+    </div>
+  </section>
+
+  <!-- Experience Section -->
+  <section class="section" id="experience">
+    <div class="container">
+      <h2 class="section-title">Experience & Internships</h2>
+      <div class="experience-timeline">
+        
+        <div class="timeline-item">
+          <div class="timeline-date">July 2024 - Present</div>
+          <div class="timeline-content">
+            <h3>Contributing Writer</h3>
+            <h4>Young Journalists' Association - SRM University</h4>
+            <p>Bylined articles and reports on campus events and student affairs for the association's monthly digital newsletter, developing skills in news writing and editorial processes.</p>
+            <div class="experience-tags">
+              <span class="tag">News Writing</span>
+              <span class="tag">Campus Journalism</span>
+              <span class="tag">Digital Media</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-date">June 2025 - July 2025</div>
+          <div class="timeline-content">
+            <h3>Summer Intern</h3>
+            <h4>Indian Institute of Space Science and Technology (IIST)</h4>
+            <p>Project: "Writing and Illustrating Your Creative Mind" - Conducted comprehensive studies of canonical and contemporary works, developed 8,000+ word academic paper for Routledge, and evaluated 180+ documentaries for international film festival.</p>
+            <div class="experience-tags">
+              <span class="tag">Academic Research</span>
+              <span class="tag">Film Analysis</span>
+              <span class="tag">Publication</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-date">Feb 2025 - June 2025</div>
+          <div class="timeline-content">
+            <h3>AI Language Expert</h3>
+            <h4>Soul AI - Remote</h4>
+            <p>Shortlisted for paid client projects including Project Shield and Project Ceres. Conducted critical analysis of chatbot responses and assessed performance using detailed rubrics, contributing to AI model evaluation and refinement.</p>
+            <div class="experience-tags">
+              <span class="tag">AI Training</span>
+              <span class="tag">Model Evaluation</span>
+              <span class="tag">Remote Work</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-date">July 2023 - Nov 2023</div>
+          <div class="timeline-content">
+            <h3>Content Writer Intern</h3>
+            <h4>Think Of It Foundation (TOI) - Remote</h4>
+            <p>Authored 15+ SEO-driven blog-style profiles for political candidates and constituencies for internal campaign materials. Translated documents between English and Hindi, developing multilingual content creation skills.</p>
+            <div class="experience-tags">
+              <span class="tag">SEO Writing</span>
+              <span class="tag">Political Content</span>
+              <span class="tag">Translation</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ADD NEW EXPERIENCES HERE - Copy this template: -->
+        <!-- 
+        <div class="timeline-item">
+          <div class="timeline-date">Month Year - Month Year</div>
+          <div class="timeline-content">
+            <h3>Job Title</h3>
+            <h4>Company Name - Location</h4>
+            <p>Description of your role and achievements...</p>
+            <div class="experience-tags">
+              <span class="tag">Skill1</span>
+              <span class="tag">Skill2</span>
+              <span class="tag">Skill3</span>
+            </div>
+          </div>
+        </div>
+        -->
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Skills Section -->
+  <section class="section" id="skills">
+    <div class="container">
+      <h2 class="section-title">Skills & Expertise</h2>
+      <div class="skills-grid">
+        <div class="skill-card">
+          <div class="skill-icon">✍️</div>
+          <h3>Long-form Writing</h3>
+          <p>Crafting comprehensive narratives and research papers. Authored an 8,000+ word academic paper for Routledge publication with proper citations and theoretical grounding.</p>
+        </div>
+        <div class="skill-card">
+          <div class="skill-icon">🎙️</div>
+          <h3>Podcast Production</h3>
+          <p>Creating and producing "Journalism Unplugged" podcast discussing pressing issues in modern media. Expert in Audacity and Spotify for Creators platform.</p>
+        </div>
+        <div class="skill-card">
+          <div class="skill-icon">🔍</div>
+          <h3>Research & Analysis</h3>
+          <p>Conducted extensive research on celebrity profiles and contemporary works. Evaluated 180+ short films and documentaries for international film festivals.</p>
+        </div>
+        <div class="skill-card">
+          <div class="skill-icon">🤖</div>
+          <h3>AI Evaluation</h3>
+          <p>Training and evaluating AI chatbots at Soul AI. Critical analysis of chatbot responses using detailed rubrics for model refinement and improvement.</p>
+        </div>
+        <div class="skill-card">
+          <div class="skill-icon">🎨</div>
+          <h3>Multimedia Production</h3>
+          <p>Creating visual content with Adobe Photoshop and InDesign. Combining traditional journalism skills with modern digital storytelling techniques.</p>
+        </div>
+        <div class="skill-card">
+          <div class="skill-icon">📊</div>
+          <h3>Data Journalism</h3>
+          <p>Applying analytical skills to transform complex information into engaging stories. Coursework in Communication Research Methods and Data Journalism.</p>
+        </div>
+
+        <!-- ADD NEW SKILLS HERE - Copy this template: -->
+        <!-- 
+        <div class="skill-card">
+          <div class="skill-icon">📺</div>
+          <h3>Video Production</h3>
+          <p>Description of your video production skills and experience...</p>
+        </div>
+        -->
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Projects Section -->
+  <section class="section" id="projects">
+    <div class="container">
+      <h2 class="section-title">Featured Projects</h2>
+      <div class="projects-grid">
+        <div class="project-card">
+          <div class="project-image">🎙️</div>
+          <div class="project-content">
+            <h3 class="project-title">Journalism Unplugged Podcast</h3>
+            <p class="project-desc">A thought-provoking podcast series discussing the most pressing issues in modern media, exploring the intersection of traditional journalism and digital innovation.</p>
+            <div class="project-tags">
+              <span class="tag">Audacity</span>
+              <span class="tag">Spotify</span>
+              <span class="tag">Media Analysis</span>
+            </div>
+            <a href="#" class="project-link">Listen on Spotify →</a>
+          </div>
+        </div>
+        <div class="project-card">
+          <div class="project-image">📚</div>
+          <div class="project-content">
+            <h3 class="project-title">Routledge Academic Paper</h3>
+            <p class="project-desc">An 8,000+ word comprehensive academic paper on celebrity profiles, featuring extensive research, proper citations, and theoretical grounding for a prestigious Routledge publication.</p>
+            <div class="project-tags">
+              <span class="tag">Academic Writing</span>
+              <span class="tag">Research</span>
+              <span class="tag">Publication</span>
+            </div>
+            <a href="#" class="project-link">Read Paper →</a>
+          </div>
+        </div>
+        <div class="project-card">
+          <div class="project-image">🎬</div>
+          <div class="project-content">
+            <h3 class="project-title">Film Festival Evaluation</h3>
+            <p class="project-desc">Comprehensive review and evaluation of 180+ short films and documentaries for the 17th International Documentary and Short Film Festival of Kerala 2025.</p>
+            <div class="project-tags">
+              <span class="tag">Film Criticism</span>
+              <span class="tag">Documentary</span>
+              <span class="tag">Festival Jury</span>
+            </div>
+            <a href="#" class="project-link">View Reviews →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Blog Section -->
+  <section class="section" id="blog">
+    <div class="container">
+      <h2 class="section-title">Latest Blog Posts</h2>
+      <div class="blog-posts">
+        <article class="blog-post">
+          <div class="blog-date">
+            <div style="font-size: 2rem; font-weight: bold;">Apr</div>
+            <div>2025</div>
+          </div>
+          <div class="blog-content">
+            <h3>The Mehta Boys and the Beautiful Decay of a Father-Son Bond</h3>
+            <p class="blog-excerpt">A deep dive into contemporary cinema exploring the complex dynamics of family relationships. Published in "Cut, and Print!" - an analysis of how modern filmmaking captures the nuanced deterioration and beauty of paternal bonds.</p>
+            <a href="#" class="project-link">Read Full Article →</a>
+          </div>
+        </article>
+        <article class="blog-post">
+          <div class="blog-date">
+            <div style="font-size: 2rem; font-weight: bold;">Sep</div>
+            <div>2024</div>
+          </div>
+          <div class="blog-content">
+            <h3>Journalism Unplugged: The Future of Media</h3>
+            <p class="blog-excerpt">Launching thoughts on the evolution of journalism in the digital age. Exploring how traditional reporting methods adapt to new platforms while maintaining editorial integrity and audience engagement in an increasingly fragmented media landscape.</p>
+            <a href="#" class="project-link">Listen to Episode →</a>
+          </div>
+        </article>
+        <article class="blog-post">
+          <div class="blog-date">
+            <div style="font-size: 2rem; font-weight: bold;">Jul</div>
+            <div>2024</div>
+          </div>
+          <div class="blog-content">
+            <h3>AI in Newsrooms: Training the Next Generation</h3>
+            <p class="blog-excerpt">Insights from my experience as an AI Language Expert at Soul AI, exploring how artificial intelligence is reshaping journalism workflows, fact-checking processes, and the delicate balance between automation and human editorial judgment.</p>
+            <a href="#" class="project-link">Read Analysis →</a>
+          </div>
+        </article>
+
+        <!-- ADD NEW BLOG POSTS HERE - Copy this template: -->
+        <!-- 
+        <article class="blog-post">
+          <div class="blog-date">
+            <div style="font-size: 2rem; font-weight: bold;">Dec</div>
+            <div>2025</div>
+          </div>
+          <div class="blog-content">
+            <h3>Your New Article Title</h3>
+            <p class="blog-excerpt">Brief description or excerpt from your new article...</p>
+            <a href="#" class="project-link">Read Article →</a>
+          </div>
+        </article>
+        -->
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section class="section contact" id="contact">
+    <div class="container">
+      <div class="contact-content">
+        <h2 class="section-title" style="color: white;">Let's Create Something Amazing</h2>
+        <p>Ready to bring ideas to life? Share the project and get a reply soon.</p>
+        <form class="contact-form">
+          <div class="form-group">
+            <input type="text" placeholder="Your Name" required />
+            <input type="email" placeholder="Your Email" required />
+          </div>
+          <input type="text" placeholder="Project Type" />
+          <textarea rows="5" placeholder="Tell me about your project..." required></textarea>
+          <button type="submit" class="submit-btn">Send Message</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="social-links">
+        <a href="mailto:anandverma2332@gmail.com" title="Email">✉️</a>
+        <a href="https://linkedin.com/in/anand-verma-18384817a" title="LinkedIn">💼</a>
+        <a href="tel:8935926510" title="Phone">📞</a>
+        <a href="#" title="Spotify Podcast">🎙️</a>
+      </div>
+      <p>&copy; 2025 Anand Verma. Crafted with ❤️ and endless curiosity.</p>
+    </div>
+  </footer>
+
+  <script>
+    // Progress Bar
+    function updateProgressBar() {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      const scrolled = max > 0 ? (window.pageYOffset / max) * 100 : 0;
+      document.getElementById('progressBar').style.width = scrolled + '%';
+    }
+
+    // Navbar scroll effect
+    function updateNavbar() {
+      const navbar = document.getElementById('navbar');
+      if (window.pageYOffset > 100) {
+        navbar.classList.add('scrolled');
+      } else {
+        navbar.classList.remove('scrolled');
+      }
+    }
+
+    // Parallax effect for hero section (lightweight)
+    function parallaxEffect() {
+      const hero = document.querySelector('.hero');
+      if (!hero) return;
+      // Translate slightly based on viewport position
+      const rect = hero.getBoundingClientRect();
+      const offset = Math.max(0, -rect.top);
+      hero.style.transform = `translateY(${offset * 0.2}px)`;
+    }
+
+    // Smooth scrolling for navigation links + keep hash
+    document.querySelectorAll('nav a').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        const targetId = this.getAttribute('href');
+        const targetElement = document.querySelector(targetId);
+        if (!targetElement) return;
+        e.preventDefault();
+        targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // update address bar
+        history.pushState(null, '', targetId);
+      });
+    });
+
+    // Intersection Observer for animations
+    const observerOptions = { threshold: 0.1, rootMargin: '0px 0px -50px 0px' };
+
+    const appearOnceObserver = new IntersectionObserver((entries, obs) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('animate');
+          obs.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+
+    const elementsToAnimate = document.querySelectorAll('.section-title, .about-text, .about-image, .project-card, .blog-post, .timeline-item');
+    elementsToAnimate.forEach(el => appearOnceObserver.observe(el));
+
+    // Stagger animation for skill cards (deterministic via index map)
+    const skillCards = Array.from(document.querySelectorAll('.skill-card'));
+    const skillIndexMap = new Map(skillCards.map((el, i) => [el, i]));
+    const skillObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const i = skillIndexMap.get(entry.target) || 0;
+          setTimeout(() => entry.target.classList.add('animate'), i * 100);
+          skillObserver.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+    skillCards.forEach(card => skillObserver.observe(card));
+
+    // Scroll orchestration with rAF for perf
+    let ticking = false;
+    function onScroll() {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          updateProgressBar();
+          updateNavbar();
+          parallaxEffect();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', updateProgressBar);
+
+    // Contact form submission (mailto + optimistic UI)
+    const contactForm = document.querySelector('.contact-form');
+    if (contactForm) {
+      contactForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const form = this;
+        const name = form.querySelector('input[placeholder="Your Name"]').value.trim();
+        const email = form.querySelector('input[placeholder="Your Email"]').value.trim();
+        const project = form.querySelector('input[placeholder="Project Type"]').value.trim();
+        const message = form.querySelector('textarea').value.trim();
+
+        const submitBtn = form.querySelector('.submit-btn');
+        const originalText = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Sending…';
+
+        // Build a mailto link (client-side only)
+        const to = 'anandverma2332@gmail.com';
+        const subject = `Portfolio Contact: ${project || 'New Message'}`;
+        const body = `Name: ${name}\nEmail: ${email}\nProject: ${project}\n\n${message}`;
+        const href = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+        // Try to open the user's mail client
+        window.location.href = href;
+
+        // Optimistic success UI
+        setTimeout(() => {
+          submitBtn.textContent = 'Sent ✓';
+          form.reset();
+          setTimeout(() => {
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+          }, 1500);
+        }, 800);
+      });
+    }
+
+    // Initial paint sync
+    updateProgressBar();
+    updateNavbar();
+    parallaxEffect();
+  </script>
+</body>
+</html>
